@@ -52,7 +52,7 @@ class DialogueWithSharedMemoryChains:
         text_splitter = CharacterTextSplitter(chunk_size=3, chunk_overlap=1)
         texts = text_splitter.split_documents(documents)
         docsearch = Chroma.from_documents(texts, self.embeddings, collection_name="state-of-history")
-        self.state_of_history = RetrievalQA.from_chain_type(llm=self.ask_llm, chain_type="stuff",
+        self.state_of_history = RetrievalQA.from_chain_type(llm=self.ask_llm, chain_type="map_reduce",
                                                             retriever=docsearch.as_retriever())
 
     def _agents_answer(self):

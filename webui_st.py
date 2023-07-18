@@ -138,8 +138,7 @@ knowledge_base_test_mode_info = ("【注意】\n\n"
 
 
 webui_title = """
-# 🎉langchain-ChatGLM WebUI🎉
-👍 [https://github.com/imClumsyPanda/langchain-ChatGLM](https://github.com/imClumsyPanda/langchain-ChatGLM)
+# 专业领域大语言模型
 """
 ######                   #####
 

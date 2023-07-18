@@ -13,12 +13,13 @@ logging.basicConfig(format=LOG_FORMAT)
 # 如将 "text2vec": "GanymedeNil/text2vec-large-chinese" 修改为 "text2vec": "User/Downloads/text2vec-large-chinese"
 # 此处请写绝对路径
 embedding_model_dict = {
-    "ernie-tiny": "nghuyong/ernie-3.0-nano-zh",
-    "ernie-base": "nghuyong/ernie-3.0-base-zh",
-    "text2vec-base": "shibing624/text2vec-base-chinese",
-    "text2vec": "GanymedeNil/text2vec-large-chinese",
-    "m3e-small": "moka-ai/m3e-small",
-    "m3e-base": "moka-ai/m3e-base",
+    # "ernie-tiny": "nghuyong/ernie-3.0-nano-zh",
+    # "ernie-base": "nghuyong/ernie-3.0-base-zh",
+    "text2vec-mini": "/home/lcgpt/.cache/torch/sentence_transformers/sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2/",
+    "text2vec-base": "/home/lcgpt/.cache/torch/sentence_transformers/shibing624_text2vec-base-chinese/",
+    "text2vec": "/home/lcgpt/.cache/torch/sentence_transformers/GanymedeNil_text2vec-large-chinese/",
+    # "m3e-small": "moka-ai/m3e-small",
+    # "m3e-base": "moka-ai/m3e-base",
 }
 
 # Embedding model name
@@ -33,139 +34,139 @@ EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backe
 # 如将 "chatglm-6b" 的 "local_model_path" 由 None 修改为 "User/Downloads/chatglm-6b"
 # 此处请写绝对路径
 llm_model_dict = {
-    "chatglm-6b-int4-qe": {
-        "name": "chatglm-6b-int4-qe",
-        "pretrained_model_name": "THUDM/chatglm-6b-int4-qe",
-        "local_model_path": None,
-        "provides": "ChatGLMLLMChain"
-    },
-    "chatglm-6b-int4": {
-        "name": "chatglm-6b-int4",
-        "pretrained_model_name": "THUDM/chatglm-6b-int4",
-        "local_model_path": None,
-        "provides": "ChatGLMLLMChain"
-    },
-    "chatglm-6b-int8": {
-        "name": "chatglm-6b-int8",
-        "pretrained_model_name": "THUDM/chatglm-6b-int8",
-        "local_model_path": None,
-        "provides": "ChatGLMLLMChain"
-    },
+    # "chatglm-6b-int4-qe": {
+    #     "name": "chatglm-6b-int4-qe",
+    #     "pretrained_model_name": "THUDM/chatglm-6b-int4-qe",
+    #     "local_model_path": None,
+    #     "provides": "ChatGLMLLMChain"
+    # },
+    # "chatglm-6b-int4": {
+    #     "name": "chatglm-6b-int4",
+    #     "pretrained_model_name": "THUDM/chatglm-6b-int4",
+    #     "local_model_path": None,
+    #     "provides": "ChatGLMLLMChain"
+    # },
+    # "chatglm-6b-int8": {
+    #     "name": "chatglm-6b-int8",
+    #     "pretrained_model_name": "THUDM/chatglm-6b-int8",
+    #     "local_model_path": None,
+    #     "provides": "ChatGLMLLMChain"
+    # },
     "chatglm-6b": {
         "name": "chatglm-6b",
-        "pretrained_model_name": "THUDM/chatglm-6b",
-        "local_model_path": None,
+        "pretrained_model_name": "chatglm-6b",
+        "local_model_path": "/opt/lcgpt/llms/chatglm2-6b",
         "provides": "ChatGLMLLMChain"
     },
     "chatglm2-6b": {
         "name": "chatglm2-6b",
-        "pretrained_model_name": "THUDM/chatglm2-6b",
-        "local_model_path": None,
+        "pretrained_model_name": "chatglm2-6b",
+        "local_model_path": "/opt/lcgpt/llms/chatglm2-6b",
         "provides": "ChatGLMLLMChain"
     },
-    "chatglm2-6b-int4": {
-        "name": "chatglm2-6b-int4",
-        "pretrained_model_name": "THUDM/chatglm2-6b-int4",
-        "local_model_path": None,
-        "provides": "ChatGLMLLMChain"
-    },
-    "chatglm2-6b-int8": {
-        "name": "chatglm2-6b-int8",
-        "pretrained_model_name": "THUDM/chatglm2-6b-int8",
-        "local_model_path": None,
-        "provides": "ChatGLMLLMChain"
-    },
-    "chatyuan": {
-        "name": "chatyuan",
-        "pretrained_model_name": "ClueAI/ChatYuan-large-v2",
-        "local_model_path": None,
-        "provides": "MOSSLLMChain"
-    },
-    "moss": {
-        "name": "moss",
-        "pretrained_model_name": "fnlp/moss-moon-003-sft",
-        "local_model_path": None,
-        "provides": "MOSSLLMChain"
-    },
+    # "chatglm2-6b-int4": {
+    #     "name": "chatglm2-6b-int4",
+    #     "pretrained_model_name": "THUDM/chatglm2-6b-int4",
+    #     "local_model_path": None,
+    #     "provides": "ChatGLMLLMChain"
+    # },
+    # "chatglm2-6b-int8": {
+    #     "name": "chatglm2-6b-int8",
+    #     "pretrained_model_name": "THUDM/chatglm2-6b-int8",
+    #     "local_model_path": None,
+    #     "provides": "ChatGLMLLMChain"
+    # },
+    # "chatyuan": {
+    #     "name": "chatyuan",
+    #     "pretrained_model_name": "ClueAI/ChatYuan-large-v2",
+    #     "local_model_path": None,
+    #     "provides": "MOSSLLMChain"
+    # },
+    # "moss": {
+    #     "name": "moss",
+    #     "pretrained_model_name": "fnlp/moss-moon-003-sft",
+    #     "local_model_path": None,
+    #     "provides": "MOSSLLMChain"
+    # },
     "vicuna-13b-hf": {
         "name": "vicuna-13b-hf",
         "pretrained_model_name": "vicuna-13b-hf",
-        "local_model_path": None,
+        "local_model_path": "/opt/lcgpt/llms/vicuna-13b-v1.3",
         "provides": "LLamaLLMChain"
     },
-    "vicuna-7b-hf": {
-        "name": "vicuna-13b-hf",
-        "pretrained_model_name": "vicuna-13b-hf",
-        "local_model_path": None,
-        "provides": "LLamaLLMChain"
-    },
-    # 直接调用返回requests.exceptions.ConnectionError错误，需要通过huggingface_hub包里的snapshot_download函数
-    # 下载模型，如果snapshot_download还是返回网络错误，多试几次，一般是可以的，
-    # 如果仍然不行，则应该是网络加了防火墙(在服务器上这种情况比较常见)，基本只能从别的设备上下载，
-    # 然后转移到目标设备了.
-    "bloomz-7b1": {
-        "name": "bloomz-7b1",
-        "pretrained_model_name": "bigscience/bloomz-7b1",
-        "local_model_path": None,
-        "provides": "MOSSLLMChain"
+    # "vicuna-7b-hf": {
+    #     "name": "vicuna-13b-hf",
+    #     "pretrained_model_name": "vicuna-13b-hf",
+    #     "local_model_path": None,
+    #     "provides": "LLamaLLMChain"
+    # },
+    # # 直接调用返回requests.exceptions.ConnectionError错误，需要通过huggingface_hub包里的snapshot_download函数
+    # # 下载模型，如果snapshot_download还是返回网络错误，多试几次，一般是可以的，
+    # # 如果仍然不行，则应该是网络加了防火墙(在服务器上这种情况比较常见)，基本只能从别的设备上下载，
+    # # 然后转移到目标设备了.
+    # "bloomz-7b1": {
+    #     "name": "bloomz-7b1",
+    #     "pretrained_model_name": "bigscience/bloomz-7b1",
+    #     "local_model_path": None,
+    #     "provides": "MOSSLLMChain"
 
-    },
-    # 实测加载bigscience/bloom-3b需要170秒左右，暂不清楚为什么这么慢
-    # 应与它要加载专有token有关
-    "bloom-3b": {
-        "name": "bloom-3b",
-        "pretrained_model_name": "bigscience/bloom-3b",
-        "local_model_path": None,
-        "provides": "MOSSLLMChain"
+    # },
+    # # 实测加载bigscience/bloom-3b需要170秒左右，暂不清楚为什么这么慢
+    # # 应与它要加载专有token有关
+    # "bloom-3b": {
+    #     "name": "bloom-3b",
+    #     "pretrained_model_name": "bigscience/bloom-3b",
+    #     "local_model_path": None,
+    #     "provides": "MOSSLLMChain"
 
-    },
-    "baichuan-7b": {
-        "name": "baichuan-7b",
-        "pretrained_model_name": "baichuan-inc/baichuan-7B",
-        "local_model_path": None,
-        "provides": "MOSSLLMChain"
-    },
-    # llama-cpp模型的兼容性问题参考https://github.com/abetlen/llama-cpp-python/issues/204
-    "ggml-vicuna-13b-1.1-q5": {
-        "name": "ggml-vicuna-13b-1.1-q5",
-        "pretrained_model_name": "lmsys/vicuna-13b-delta-v1.1",
-        # 这里需要下载好模型的路径,如果下载模型是默认路径则它会下载到用户工作区的
-        # /.cache/huggingface/hub/models--vicuna--ggml-vicuna-13b-1.1/
-        # 还有就是由于本项目加载模型的方式设置的比较严格，下载完成后仍需手动修改模型的文件名
-        # 将其设置为与Huggface Hub一致的文件名
-        # 此外不同时期的ggml格式并不兼容，因此不同时期的ggml需要安装不同的llama-cpp-python库，且实测pip install 不好使
-        # 需要手动从https://github.com/abetlen/llama-cpp-python/releases/tag/下载对应的wheel安装
-        # 实测v0.1.63与本模型的vicuna/ggml-vicuna-13b-1.1/ggml-vic13b-q5_1.bin可以兼容
-        "local_model_path": f'''{"/".join(os.path.abspath(__file__).split("/")[:3])}/.cache/huggingface/hub/models--vicuna--ggml-vicuna-13b-1.1/blobs/''',
-        "provides": "LLamaLLMChain"
-    },
+    # },
+    # "baichuan-7b": {
+    #     "name": "baichuan-7b",
+    #     "pretrained_model_name": "baichuan-inc/baichuan-7B",
+    #     "local_model_path": None,
+    #     "provides": "MOSSLLMChain"
+    # },
+    # # llama-cpp模型的兼容性问题参考https://github.com/abetlen/llama-cpp-python/issues/204
+    # "ggml-vicuna-13b-1.1-q5": {
+    #     "name": "ggml-vicuna-13b-1.1-q5",
+    #     "pretrained_model_name": "lmsys/vicuna-13b-delta-v1.1",
+    #     # 这里需要下载好模型的路径,如果下载模型是默认路径则它会下载到用户工作区的
+    #     # /.cache/huggingface/hub/models--vicuna--ggml-vicuna-13b-1.1/
+    #     # 还有就是由于本项目加载模型的方式设置的比较严格，下载完成后仍需手动修改模型的文件名
+    #     # 将其设置为与Huggface Hub一致的文件名
+    #     # 此外不同时期的ggml格式并不兼容，因此不同时期的ggml需要安装不同的llama-cpp-python库，且实测pip install 不好使
+    #     # 需要手动从https://github.com/abetlen/llama-cpp-python/releases/tag/下载对应的wheel安装
+    #     # 实测v0.1.63与本模型的vicuna/ggml-vicuna-13b-1.1/ggml-vic13b-q5_1.bin可以兼容
+    #     "local_model_path": f'''{"/".join(os.path.abspath(__file__).split("/")[:3])}/.cache/huggingface/hub/models--vicuna--ggml-vicuna-13b-1.1/blobs/''',
+    #     "provides": "LLamaLLMChain"
+    # },
 
-    # 通过 fastchat 调用的模型请参考如下格式
-    "fastchat-chatglm-6b": {
-        "name": "chatglm-6b",  # "name"修改为fastchat服务中的"model_name"
-        "pretrained_model_name": "chatglm-6b",
-        "local_model_path": None,
-        "provides": "FastChatOpenAILLMChain",  # 使用fastchat api时，需保证"provides"为"FastChatOpenAILLMChain"
-        "api_base_url": "http://localhost:8000/v1",  # "name"修改为fastchat服务中的"api_base_url"
-        "api_key": "EMPTY"
-    },
-    "fastchat-chatglm2-6b": {
-        "name": "chatglm2-6b",  # "name"修改为fastchat服务中的"model_name"
-        "pretrained_model_name": "chatglm2-6b",
-        "local_model_path": None,
-        "provides": "FastChatOpenAILLMChain",  # 使用fastchat api时，需保证"provides"为"FastChatOpenAILLMChain"
-        "api_base_url": "http://localhost:8000/v1"  # "name"修改为fastchat服务中的"api_base_url"
-    },
+    # # 通过 fastchat 调用的模型请参考如下格式
+    # "fastchat-chatglm-6b": {
+    #     "name": "chatglm-6b",  # "name"修改为fastchat服务中的"model_name"
+    #     "pretrained_model_name": "chatglm-6b",
+    #     "local_model_path": None,
+    #     "provides": "FastChatOpenAILLMChain",  # 使用fastchat api时，需保证"provides"为"FastChatOpenAILLMChain"
+    #     "api_base_url": "http://localhost:8000/v1",  # "name"修改为fastchat服务中的"api_base_url"
+    #     "api_key": "EMPTY"
+    # },
+    # "fastchat-chatglm2-6b": {
+    #     "name": "chatglm2-6b",  # "name"修改为fastchat服务中的"model_name"
+    #     "pretrained_model_name": "chatglm2-6b",
+    #     "local_model_path": None,
+    #     "provides": "FastChatOpenAILLMChain",  # 使用fastchat api时，需保证"provides"为"FastChatOpenAILLMChain"
+    #     "api_base_url": "http://localhost:8000/v1"  # "name"修改为fastchat服务中的"api_base_url"
+    # },
 
-    # 通过 fastchat 调用的模型请参考如下格式
-    "fastchat-vicuna-13b-hf": {
-        "name": "vicuna-13b-hf",  # "name"修改为fastchat服务中的"model_name"
-        "pretrained_model_name": "vicuna-13b-hf",
-        "local_model_path": None,
-        "provides": "FastChatOpenAILLMChain",  # 使用fastchat api时，需保证"provides"为"FastChatOpenAILLMChain"
-        "api_base_url": "http://localhost:8000/v1",  # "name"修改为fastchat服务中的"api_base_url"
-        "api_key": "EMPTY"
-    },
+    # # 通过 fastchat 调用的模型请参考如下格式
+    # "fastchat-vicuna-13b-hf": {
+    #     "name": "vicuna-13b-hf",  # "name"修改为fastchat服务中的"model_name"
+    #     "pretrained_model_name": "vicuna-13b-hf",
+    #     "local_model_path": None,
+    #     "provides": "FastChatOpenAILLMChain",  # 使用fastchat api时，需保证"provides"为"FastChatOpenAILLMChain"
+    #     "api_base_url": "http://localhost:8000/v1",  # "name"修改为fastchat服务中的"api_base_url"
+    #     "api_key": "EMPTY"
+    # },
     # 调用chatgpt时如果报出： urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.openai.com', port=443):
     #  Max retries exceeded with url: /v1/chat/completions
     # 则需要将urllib3版本修改为1.25.11
@@ -179,14 +180,15 @@ llm_model_dict = {
         "pretrained_model_name": "gpt-3.5-turbo",
         "provides": "FastChatOpenAILLMChain",
         "local_model_path": None,
-        "api_base_url": "https://api.openapi.com/v1",
-        "api_key": ""
+        # "api_base_url": "https://api.openapi.com/v1",
+        "api_base_url": "https://oa.api2d.net/v1",
+        "api_key": "fk204612-ZsFmjA1waVoinXEZfN6w42Fr7467N5cq"
     },
 
 }
 
 # LLM 名称
-LLM_MODEL = "chatglm-6b"
+LLM_MODEL = "openai-chatgpt-3.5"
 # 量化加载8bit 模型
 LOAD_IN_8BIT = False
 # Load the model with bfloat16 precision. Requires NVIDIA Ampere GPU.
@@ -226,7 +228,7 @@ SENTENCE_SIZE = 100
 CHUNK_SIZE = 250
 
 # 传入LLM的历史记录长度
-LLM_HISTORY_LEN = 3
+LLM_HISTORY_LEN = 5
 
 # 知识库检索时返回的匹配内容条数
 VECTOR_SEARCH_TOP_K = 5

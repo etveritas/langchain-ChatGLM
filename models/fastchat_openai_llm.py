@@ -81,8 +81,8 @@ class FastChatOpenAILLMChain(RemoteRpcModel, Chain, ABC):
     max_retries: int = 6
     api_base_url: str = "http://localhost:8000/v1"
     model_name: str = "chatglm-6b"
-    max_token: int = 10000
-    temperature: float = 0.01
+    max_token: int = 4096
+    temperature: float = 0.00
     top_p = 0.9
     checkPoint: LoaderCheckPoint = None
     # history = []
