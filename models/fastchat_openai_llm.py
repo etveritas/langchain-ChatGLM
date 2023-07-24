@@ -169,7 +169,6 @@ class FastChatOpenAILLMChain(RemoteRpcModel, Chain, ABC):
 
         @retry_decorator
         def _completion_with_retry(**kwargs: Any) -> Any:
-            print("msg:", kwargs["messages"])
             return self.client.create(**kwargs)
 
         return _completion_with_retry(**kwargs)
