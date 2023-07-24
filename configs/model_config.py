@@ -15,9 +15,9 @@ logging.basicConfig(format=LOG_FORMAT)
 embedding_model_dict = {
     # "ernie-tiny": "nghuyong/ernie-3.0-nano-zh",
     # "ernie-base": "nghuyong/ernie-3.0-base-zh",
-    "text2vec-mini": "/home/lcgpt/.cache/torch/sentence_transformers/sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2/",
-    "text2vec-base": "/home/lcgpt/.cache/torch/sentence_transformers/shibing624_text2vec-base-chinese/",
-    "text2vec": "/home/lcgpt/.cache/torch/sentence_transformers/GanymedeNil_text2vec-large-chinese/",
+    "text2vec-mini": "/Users/wavy/.cache/torch/sentence_transformers/sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2/",
+    "text2vec-base": "/Users/wavy/.cache/torch/sentence_transformers/shibing624_text2vec-base-chinese/",
+    "text2vec": "/Users/wavy/.cache/torch/sentence_transformers/GanymedeNil_text2vec-large-chinese/",
     # "m3e-small": "moka-ai/m3e-small",
     # "m3e-base": "moka-ai/m3e-base",
 }
@@ -176,8 +176,8 @@ llm_model_dict = {
     # Failed to establish a new connection: [WinError 10060]
     # 则是因为内地和香港的IP都被OPENAI封了，需要挂切换为日本、新加坡等地
     "openai-chatgpt-3.5": {
-        "name": "gpt-3.5-turbo",
-        "pretrained_model_name": "gpt-3.5-turbo",
+        "name": "gpt-3.5-turbo-16k",
+        "pretrained_model_name": "gpt-3.5-turbo-16k",
         "provides": "FastChatOpenAILLMChain",
         "local_model_path": None,
         # "api_base_url": "https://api.openapi.com/v1",
@@ -201,7 +201,7 @@ LLM_LORA_PATH = ""
 USE_LORA = True if LLM_LORA_PATH else False
 
 # LLM streaming reponse
-STREAMING = True
+STREAMING = False
 
 # Use p-tuning-v2 PrefixEncoder
 USE_PTUNING_V2 = False
@@ -225,16 +225,16 @@ CACHED_VS_NUM = 1
 SENTENCE_SIZE = 100
 
 # 匹配后单段上下文长度
-CHUNK_SIZE = 250
+CHUNK_SIZE = 500
 
 # 传入LLM的历史记录长度
-LLM_HISTORY_LEN = 5
+LLM_HISTORY_LEN = 3
 
 # 知识库检索时返回的匹配内容条数
 VECTOR_SEARCH_TOP_K = 5
 
 # 知识检索内容相关度 Score, 数值范围约为0-1100，如果为0，则不生效，建议设置为500左右，经测试设置为小于500时，匹配结果更精准
-VECTOR_SEARCH_SCORE_THRESHOLD = 500
+VECTOR_SEARCH_SCORE_THRESHOLD = 700
 
 NLTK_DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "nltk_data")
 

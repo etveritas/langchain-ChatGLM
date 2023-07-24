@@ -169,6 +169,7 @@ class FastChatOpenAILLMChain(RemoteRpcModel, Chain, ABC):
 
         @retry_decorator
         def _completion_with_retry(**kwargs: Any) -> Any:
+            print("msg:", kwargs["messages"])
             return self.client.create(**kwargs)
 
         return _completion_with_retry(**kwargs)
@@ -209,12 +210,16 @@ class FastChatOpenAILLMChain(RemoteRpcModel, Chain, ABC):
         if streaming:
             params = {"stream": streaming,
                       "model": self.model_name,
-                      "stop": stop}
+                      "stop": stop,
+                      "temperature": self.temperature,
+                      "max_tokens": self.max_token,
+                      "top_p": self.top_p,}
             out_str = ""
             for stream_resp in self.completion_with_retry(
                     messages=msg,
                     **params
             ):
+                print("msg:", msg)
                 role = stream_resp["choices"][0]["delta"].get("role", "")
                 token = stream_resp["choices"][0]["delta"].get("content", "")
                 out_str += token
@@ -227,7 +232,10 @@ class FastChatOpenAILLMChain(RemoteRpcModel, Chain, ABC):
 
             params = {"stream": streaming,
                       "model": self.model_name,
-                      "stop": stop}
+                      "stop": stop,
+                      "temperature": self.temperature,
+                      "max_tokens": self.max_token,
+                      "top_p": self.top_p,}
             response = self.completion_with_retry(
                 messages=msg,
                 **params
