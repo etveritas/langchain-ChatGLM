@@ -81,7 +81,7 @@ class FastChatOpenAILLMChain(RemoteRpcModel, Chain, ABC):
     max_retries: int = 6
     api_base_url: str = "http://localhost:8000/v1"
     model_name: str = "chatglm-6b"
-    max_token: int = 4096
+    max_token: int = 1024
     temperature: float = 0.00
     top_p = 0.9
     checkPoint: LoaderCheckPoint = None
@@ -186,7 +186,10 @@ class FastChatOpenAILLMChain(RemoteRpcModel, Chain, ABC):
                          run_manager: Optional[CallbackManagerForChainRun] = None,
                          generate_with_callback: AnswerResultStream = None) -> None:
 
-        history = inputs.get(self.history_key, [])
+        tmp_his = inputs.get(self.history_key, [])
+        if len(tmp_his) > 0:
+            tmp_his[-1][-1] = tmp_his[-1][-1].split("<details> <summary>")[0]
+        history = tmp_his[-self.history_len:] if self.history_len > 0 else []
         streaming = inputs.get(self.streaming_key, False)
         prompt = inputs[self.prompt_key]
         stop = inputs.get("stop", "stop")
@@ -218,7 +221,7 @@ class FastChatOpenAILLMChain(RemoteRpcModel, Chain, ABC):
                     messages=msg,
                     **params
             ):
-                print("msg:", msg)
+
                 role = stream_resp["choices"][0]["delta"].get("role", "")
                 token = stream_resp["choices"][0]["delta"].get("content", "")
                 out_str += token
@@ -252,15 +255,15 @@ if __name__ == "__main__":
 
     chain = FastChatOpenAILLMChain()
 
-    chain.set_api_key("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")
-    # chain.set_api_base_url("https://api.openai.com/v1")
-    # chain.call_model_name("gpt-3.5-turbo")
+    chain.set_api_key("")
+    chain.set_api_base_url("https://oa.api2d.net/v1")
+    chain.call_model_name("gpt-3.5-turbo")
 
     answer_result_stream_result = chain({"streaming": True,
                                          "prompt": "你好",
-                                         "history": []
+                                         "history": [["你好", "你好啊"]]
                                          })
-
+    print(answer_result_stream_result)
     for answer_result in answer_result_stream_result['answer_result_stream']:
         resp = answer_result.llm_output["answer"]
-        print(resp)
+        print("resp:", resp)
