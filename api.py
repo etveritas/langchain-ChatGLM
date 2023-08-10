@@ -306,7 +306,7 @@ async def local_doc_chat(
         question: str = Body(..., description="Question", example="工伤保险是什么？"),
         streaming: bool = Body(False, description="是否开启流式输出，默认false，有些模型可能不支持。"),
         history: List[List[Optional[str]]] = Body(
-            [],
+            [["你好！", "你好！"]],
             description="History of previous questions and answers",
             example=[
                 [
@@ -359,7 +359,7 @@ async def local_doc_chat(
 async def bing_search_chat(
         question: str = Body(..., description="Question", example="工伤保险是什么？"),
         history: Optional[List[List[Optional[str]]]] = Body(
-            [],
+            [["你好！", "你好！"]],
             description="History of previous questions and answers",
             example=[
                 [
@@ -390,7 +390,7 @@ async def chat(
         question: str = Body(..., description="Question", example="工伤保险是什么？"),
         streaming: bool = Body(False, description="是否开启流式输出，默认false，有些模型可能不支持。"),
         history: List[List[Optional[str]]] = Body(
-            [],
+            [["你好！", "你好！"]],
             description="History of previous questions and answers",
             example=[
                 [
