@@ -41,7 +41,7 @@ def load_vector_store(
     vs_path = get_vs_path(knowledge_base_name)
     if embeddings is None:
         embeddings = load_embeddings(embed_model, embed_device)
-    search_index = FAISS.load_local(vs_path, embeddings, normalize_L2=True)
+    search_index = FAISS.load_local(vs_path, embeddings, normalize_L2=False)
     return search_index
 
 
@@ -94,14 +94,14 @@ class FaissKBService(KBService):
                    embeddings: Embeddings,
                    ):
         if os.path.exists(self.vs_path) and "index.faiss" in os.listdir(self.vs_path):
-            vector_store = FAISS.load_local(self.vs_path, embeddings, normalize_L2=True)
+            vector_store = FAISS.load_local(self.vs_path, embeddings, normalize_L2=False)
             vector_store.add_documents(docs)
             torch_gc()
         else:
             if not os.path.exists(self.vs_path):
                 os.makedirs(self.vs_path)
             vector_store = FAISS.from_documents(
-                docs, embeddings, normalize_L2=True)  # docs 为Document列表
+                docs, embeddings, normalize_L2=False)  # docs 为Document列表
             torch_gc()
         vector_store.save_local(self.vs_path)
         refresh_vs_cache(self.kb_name)
@@ -110,7 +110,7 @@ class FaissKBService(KBService):
                       kb_file: KnowledgeFile):
         embeddings = self._load_embeddings()
         if os.path.exists(self.vs_path) and "index.faiss" in os.listdir(self.vs_path):
-            vector_store = FAISS.load_local(self.vs_path, embeddings, normalize_L2=True)
+            vector_store = FAISS.load_local(self.vs_path, embeddings, normalize_L2=False)
             ids = [k for k, v in vector_store.docstore._dict.items() if v.metadata["source"] == kb_file.filepath]
             if len(ids) == 0:
                 return None
