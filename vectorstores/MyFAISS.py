@@ -1,7 +1,7 @@
 from langchain.vectorstores import FAISS
 from langchain.vectorstores.base import VectorStore
 from langchain.vectorstores.faiss import dependable_faiss_import
-from typing import Any, Callable, List, Dict
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 from langchain.docstore.base import Docstore
 from langchain.docstore.document import Document
 import numpy as np
@@ -42,7 +42,9 @@ class MyFAISS(FAISS, VectorStore):
         return lists
 
     def similarity_search_with_score_by_vector(
-            self, embedding: List[float], k: int = 4
+            self, embedding: List[float], k: int = 4, 
+            filter: Optional[Dict[str, Any]] = None,
+            fetch_k: int = 20,
     ) -> List[Document]:
         faiss = dependable_faiss_import()
         vector = np.array([embedding], dtype=np.float32)
