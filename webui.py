@@ -13,11 +13,11 @@ import os
 api = ApiRequest(base_url="http://127.0.0.1:7861", no_remote_api=False)
 
 if __name__ == "__main__":
-    st.set_page_config("Langchain-Chatchat WebUI", initial_sidebar_state="expanded")
+    st.set_page_config("Langchain-LLM WebUI", initial_sidebar_state="expanded")
 
     if not chat_box.chat_inited:
         st.toast(
-            f"欢迎使用 [`Langchain-Chatchat`](https://github.com/chatchat-space/Langchain-Chatchat) ! \n\n"
+            f"欢迎使用 [`Langchain-LLM`] ! \n\n"
             f"当前使用模型`{LLM_MODEL}`, 您可以开始提问了."
         )
 
@@ -33,14 +33,14 @@ if __name__ == "__main__":
     }
         
     with st.sidebar:
-        st.image(
-            os.path.join(
-                os.path.dirname(__file__),
-                "img",
-                "logo-long-chatchat-trans-v2.png"
-            ),
-            use_column_width=True
-        )
+        # st.image(
+        #     os.path.join(
+        #         os.path.dirname(__file__),
+        #         "img",
+        #         "logo-long-chatchat-trans-v2.png"
+        #     ),
+        #     use_column_width=True
+        # )
         options = list(pages)
         icons = [x["icon"] for x in pages.values()]
 
