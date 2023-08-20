@@ -1,14 +1,11 @@
 import os
 import logging
 import torch
-import argparse
-import json
 # 日志格式
 LOG_FORMAT = "%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s"
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logging.basicConfig(format=LOG_FORMAT)
-import json
 
 
 # 在以下字典中修改属性值，以指定本地embedding模型存储位置
@@ -46,25 +43,25 @@ llm_model_dict = {
 
     "chatglm-6b-int4": {
         "local_model_path": "THUDM/chatglm-6b-int4",
-        "api_base_url": "http://localhost:8001/v1",  # "name"修改为fastchat服务中的"api_base_url"
+        "api_base_url": "http://localhost:8888/v1",  # "name"修改为fastchat服务中的"api_base_url"
         "api_key": "EMPTY"
     },
 
     "chatglm2-6b": {
         "local_model_path": "THUDM/chatglm2-6b",
-        "api_base_url": "http://localhost:8888/v1",  # "name"修改为fastchat服务中的"api_base_url"
+        "api_base_url": "http://localhost:8888/v1",  # URL需要与运行fastchat服务端的server_config.FSCHAT_OPENAI_API一致
         "api_key": "EMPTY"
     },
 
     "chatglm2-6b-32k": {
         "local_model_path": "THUDM/chatglm2-6b-32k",  # "THUDM/chatglm2-6b-32k",
-        "api_base_url": "http://localhost:8888/v1",  # "name"修改为fastchat服务中的"api_base_url"
+        "api_base_url": "http://localhost:8888/v1",  # "URL需要与运行fastchat服务端的server_config.FSCHAT_OPENAI_API一致
         "api_key": "EMPTY"
     },
 
     "vicuna-13b-hf": {
         "local_model_path": "",
-        "api_base_url": "http://localhost:8000/v1",  # "name"修改为fastchat服务中的"api_base_url"
+        "api_base_url": "http://localhost:8888/v1",  # "name"修改为fastchat服务中的"api_base_url"
         "api_key": "EMPTY"
     },
 
@@ -78,12 +75,13 @@ llm_model_dict = {
     # urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x000001FE4BDB85E0>:
     # Failed to establish a new connection: [WinError 10060]
     # 则是因为内地和香港的IP都被OPENAI封了，需要切换为日本、新加坡等地
-    "openai-chatgpt-3.5": {
+    "gpt-3.5-turbo": {
         "local_model_path": "gpt-3.5-turbo",
-        "api_base_url": "https://api.openapi.com/v1",
+        "api_base_url": "https://api.openai.com/v1",
         "api_key": os.environ.get("OPENAI_API_KEY")
     },
 }
+
 
 # LLM 名称
 LLM_MODEL = "chatglm2-6b"
