@@ -50,6 +50,7 @@ LOADER_DICT = {"UnstructuredFileLoader": ['.eml', '.html', '.json', '.md', '.msg
                                           '.rtf', '.txt', '.xml',
                                           '.doc', '.docx', '.epub', '.odt', '.pdf',
                                           '.ppt', '.pptx', '.tsv'],  # '.pdf', '.xlsx', '.csv'
+               "UnstructuredExcelLoader": ['.xlsx', 'xls'],
                "CSVLoader": [".csv"],
                "PyPDFLoader": [".pdf"],
                }
