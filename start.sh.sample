@@ -1,0 +1,5 @@
+#!/bin/bash
+
+mkdir logs
+python3 server/api.py 2>&1 | tee logs/api_$(date +"%Y%m%d%H%M%S").log \
+streamlit run webui.py 2>&1 | tee logs/webui_$(date +"%Y%m%d%H%M%S").log

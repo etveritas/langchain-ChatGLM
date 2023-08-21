@@ -48,9 +48,10 @@ def load_embeddings(model: str, device: str):
 
 LOADER_DICT = {"UnstructuredFileLoader": ['.eml', '.html', '.json', '.md', '.msg', '.rst',
                                           '.rtf', '.txt', '.xml',
-                                          '.doc', '.docx', '.epub', '.odt', '.pdf',
+                                          '.docx', '.epub', '.odt', '.pdf',
                                           '.ppt', '.pptx', '.tsv'],  # '.pdf', '.xlsx', '.csv'
-               "UnstructuredExcelLoader": ['.xlsx', 'xls'],
+               "Docx2txtLoader": ['.doc'],
+               "UnstructuredExcelLoader": ['.xlsx', '.xls'],
                "CSVLoader": [".csv"],
                "PyPDFLoader": [".pdf"],
                }
@@ -120,7 +121,10 @@ class KnowledgeFile:
             )
 
         docs = loader.load_and_split(text_splitter)
-        print(docs[0])
+        try:
+            print(docs[0])
+        except:
+            print(docs)
         if using_zh_title_enhance:
             docs = zh_title_enhance(docs)
         return docs
