@@ -42,6 +42,8 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
                                            ) -> AsyncIterable[str]:
         callback = AsyncIteratorCallbackHandler()
         model = ChatOpenAI(
+            top_p=0.9,
+            temperature=0.6,
             streaming=True,
             verbose=True,
             callbacks=[callback],

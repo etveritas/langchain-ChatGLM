@@ -28,6 +28,8 @@ def chat(query: str = Body(..., description="用户输入", examples=["恼羞成
         callback = AsyncIteratorCallbackHandler()
 
         model = ChatOpenAI(
+            top_p=0.9,
+            temperature=0.6,
             streaming=True,
             verbose=True,
             callbacks=[callback],
