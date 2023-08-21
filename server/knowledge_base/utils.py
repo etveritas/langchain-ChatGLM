@@ -54,6 +54,7 @@ LOADER_DICT = {"UnstructuredFileLoader": ['.eml', '.html', '.json', '.md', '.msg
                "UnstructuredExcelLoader": ['.xlsx', '.xls'],
                "CSVLoader": [".csv"],
                "PyPDFLoader": [".pdf"],
+               "UnstructuredImageLoader": [".jpg", ".png"],
                }
 SUPPORTED_EXTS = [ext for sublist in LOADER_DICT.values() for ext in sublist]
 
