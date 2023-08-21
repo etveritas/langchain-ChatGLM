@@ -15,9 +15,9 @@ logging.basicConfig(format=LOG_FORMAT)
 embedding_model_dict = {
     # "ernie-tiny": "nghuyong/ernie-3.0-nano-zh",
     # "ernie-base": "nghuyong/ernie-3.0-base-zh",
-    "text2vec-mini": "/Users/wavy/.cache/torch/sentence_transformers/sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2/",
-    "text2vec-base": "/Users/wavy/.cache/torch/sentence_transformers/shibing624_text2vec-base-chinese/",
-    "text2vec": "/Users/wavy/.cache/torch/sentence_transformers/GanymedeNil_text2vec-large-chinese/",
+    "text2vec-mini": "/home/lcgpt/.cache/torch/sentence_transformers/sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2/",
+    "text2vec-base": "/home/lcgpt/.cache/torch/sentence_transformers/shibing624_text2vec-base-chinese/",
+    "text2vec": "/home/lcgpt/.cache/torch/sentence_transformers/GanymedeNil_text2vec-large-chinese/",
     # "m3e-small": "moka-ai/m3e-small",
     # "m3e-base": "moka-ai/m3e-base",
 }

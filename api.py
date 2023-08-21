@@ -579,7 +579,7 @@ def api_start(host, port, **kwargs):
 
 if __name__ == "__main__":
     parser.add_argument("--host", type=str, default="0.0.0.0")
-    parser.add_argument("--port", type=int, default=7861)
+    parser.add_argument("--port", type=int, default=7862)
     parser.add_argument("--ssl_keyfile", type=str)
     parser.add_argument("--ssl_certfile", type=str)
     # 初始化消息
