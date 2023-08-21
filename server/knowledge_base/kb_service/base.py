@@ -9,11 +9,11 @@ from server.db.repository.knowledge_base_repository import (
     load_kb_from_db, get_kb_detail,
 )
 from server.db.repository.knowledge_file_repository import (
-    add_doc_to_db, delete_file_from_db, doc_exists,
-    list_docs_from_db, get_file_detail
+    add_doc_to_db, delete_file_from_db, delete_files_from_db, doc_exists,
+    list_docs_from_db, get_file_detail, delete_file_from_db
 )
 
-from configs.model_config import (kbs_config, VECTOR_SEARCH_TOP_K,
+from configs.model_config import (kbs_config, VECTOR_SEARCH_TOP_K, SCORE_THRESHOLD,
                                   EMBEDDING_DEVICE, EMBEDDING_MODEL)
 from server.knowledge_base.utils import (
     get_kb_path, get_doc_path, load_embeddings, KnowledgeFile,
@@ -56,9 +56,12 @@ class KBService(ABC):
 
     def clear_vs(self):
         """
-        用知识库中已上传文件重建向量库
+        删除向量库中所有内容
         """
         self.do_clear_vs()
+        status = delete_files_from_db(self.kb_name)
+        return status
+
 
     def drop_kb(self):
         """
@@ -109,9 +112,10 @@ class KBService(ABC):
     def search_docs(self,
                     query: str,
                     top_k: int = VECTOR_SEARCH_TOP_K,
+                    score_threshold: float = SCORE_THRESHOLD,
                     ):
         embeddings = self._load_embeddings()
-        docs = self.do_search(query, top_k, embeddings)
+        docs = self.do_search(query, top_k, score_threshold, embeddings)
         return docs
 
     @abstractmethod

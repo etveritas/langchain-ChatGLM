@@ -27,7 +27,7 @@ def add_doc_to_db(session, kb_file: KnowledgeFile):
                 file_ext=kb_file.ext,
                 kb_name=kb_file.kb_name,
                 document_loader_name=kb_file.document_loader_name,
-                text_splitter_name=kb_file.text_splitter_name,
+                text_splitter_name=kb_file.text_splitter_name or "SpacyTextSplitter",
             )
             kb.file_count += 1
             session.add(new_file)
@@ -46,6 +46,18 @@ def delete_file_from_db(session, kb_file: KnowledgeFile):
         if kb:
             kb.file_count -= 1
             session.commit()
+    return True
+
+
+@with_session
+def delete_files_from_db(session, knowledge_base_name: str):
+    session.query(KnowledgeFileModel).filter_by(kb_name=knowledge_base_name).delete()
+
+    kb = session.query(KnowledgeBaseModel).filter_by(kb_name=knowledge_base_name).first()
+    if kb:
+        kb.file_count = 0
+
+    session.commit()
     return True
 
 
