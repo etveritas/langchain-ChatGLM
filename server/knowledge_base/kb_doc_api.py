@@ -18,7 +18,7 @@ class DocumentWithScore(Document):
 def search_docs(query: str = Body(..., description="用户输入", examples=["你好"]),
                 knowledge_base_name: str = Body(..., description="知识库名称", examples=["samples"]),
                 top_k: int = Body(VECTOR_SEARCH_TOP_K, description="匹配向量数"),
-                score_threshold: float = Body(SCORE_THRESHOLD, description="知识库匹配相关度阈值，取值范围在0-1之间，SCORE越小，相关度越高，取到1相当于不筛选，建议设置在0.5左右", ge=0, le=1),
+                score_threshold: float = Body(SCORE_THRESHOLD, description="知识库匹配相关度阈值，取值范围在0-1之间，SCORE越小，相关度越高，取到1相当于不筛选，建议设置在0.5左右", ge=0, le=1100),
                 ) -> List[DocumentWithScore]:
     kb = KBServiceFactory.get_service_by_name(knowledge_base_name)
     if kb is None:

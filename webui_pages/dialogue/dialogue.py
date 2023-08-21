@@ -9,7 +9,7 @@ import os
 chat_box = ChatBox(
     assistant_avatar=os.path.join(
         "img",
-        "chatchat_icon_blue_square_v2.png"
+        "icon_blue_square.png"
     )
 )
 
@@ -76,7 +76,7 @@ def dialogue_page(api: ApiRequest):
                     key="selected_kb",
                 )
                 kb_top_k = st.number_input("匹配知识条数：", 1, 20, 3)
-                score_threshold = st.number_input("知识匹配分数阈值：", 0.0, 1.0, float(SCORE_THRESHOLD), 0.01)
+                score_threshold = st.number_input("知识匹配分数阈值：", 0.0, 1100.0, float(SCORE_THRESHOLD), 0.01)
                 # chunk_content = st.checkbox("关联上下文", False, disabled=True)
                 # chunk_size = st.slider("关联长度：", 0, 500, 250, disabled=True)
         elif dialogue_mode == "搜索引擎问答":
