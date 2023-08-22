@@ -9,6 +9,8 @@ async def wrap_done(fn: Awaitable, event: asyncio.Event):
         await fn
     except Exception as e:
         # TODO: handle exception
+        import traceback
+        print(traceback.format_exc())
         print(f"Caught exception: {e}")
     finally:
         # Signal the aiter to stop.
