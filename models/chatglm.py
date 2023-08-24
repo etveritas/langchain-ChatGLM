@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 import sys
 import copy
+from aiostream.stream import list as alist
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -93,12 +94,18 @@ async def acompletion_with_retry(
 
     @retry_decorator
     async def _completion_with_retry(**kwargs: Any) -> Any:
-        # Use ChatGLM's async api https://open.bigmodel.cn/api/paas/v3/model-api/chatglm_pro/async-invoke
+        # Use ChatGLM's async api https://open.bigmodel.cn/api/paas/v3/model-api/chatglm_pro/invoke
         m_kwargs = copy.deepcopy(kwargs)
         m_kwargs["prompt"] = kwargs["messages"]
-        print(m_kwargs)
-        print(llm.client.invoke(**m_kwargs))
-        return await llm.client.invoke(**m_kwargs)
+        if m_kwargs.get("streaming") or m_kwargs.get("stream"):
+            async def async_gen(**m_kwargs):
+                print("_acompletion_with_retry sse:", m_kwargs)
+                for event in llm.client.sse_invoke(**m_kwargs).events():
+                    yield event.data
+            return alist(async_gen(**m_kwargs))
+        else:
+            print("_acompletion_with_retry:", m_kwargs)
+            return llm.client.invoke(**m_kwargs)
 
     return await _completion_with_retry(**kwargs)
 
@@ -139,7 +146,7 @@ def _convert_dict_to_message(_dict: Mapping[str, Any]) -> BaseMessage:
             additional_kwargs = {"function_call": dict(_dict["function_call"])}
         else:
             additional_kwargs = {}
-        return AIMessage(content=content, additional_kwargs=additional_kwargs)
+        return AIMessage(content=eval(content), additional_kwargs=additional_kwargs)
     elif role == "system":
         return SystemMessage(content=_dict["content"])
     elif role == "function":
@@ -343,8 +350,12 @@ class ChatChatGLM(BaseChatModel):
         def _completion_with_retry(**kwargs: Any) -> Any:
             m_kwargs = copy.deepcopy(kwargs)
             m_kwargs["prompt"] = kwargs["messages"]
-            return self.client.sse_invoke(**m_kwargs)
-
+            if m_kwargs.get("streaming") or m_kwargs.get("stream"):
+                print("_completion_with_retry sse:", m_kwargs)
+                return self.client.sse_invoke(**m_kwargs)
+            else:
+                print("_completion_with_retry:", m_kwargs)
+                return self.client.invoke(**m_kwargs)
         return _completion_with_retry(**kwargs)
 
     def _combine_llm_outputs(self, llm_outputs: List[Optional[dict]]) -> dict:
@@ -372,12 +383,10 @@ class ChatChatGLM(BaseChatModel):
         params = {**params, **kwargs, "stream": True}
 
         default_chunk_class = AIMessageChunk
-        for chunk in self.completion_with_retry(
+        for event in self.completion_with_retry(
             messages=message_dicts, run_manager=run_manager, **params
-        ):
-            if len(chunk["choices"]) == 0:
-                continue
-            delta = chunk["choices"][0]["delta"]
+        ).events():
+            delta = {"role": "assistant", "content": event.data}
             chunk = _convert_delta_to_message_chunk(delta, default_chunk_class)
             default_chunk_class = chunk.__class__
             yield ChatGenerationChunk(message=chunk)
@@ -424,8 +433,8 @@ class ChatChatGLM(BaseChatModel):
 
     def _create_chat_result(self, response: Mapping[str, Any]) -> ChatResult:
         generations = []
-        for res in response["choices"]:
-            message = _convert_dict_to_message(res["message"])
+        for res in response["data"]["choices"]:
+            message = _convert_dict_to_message(res)
             gen = ChatGeneration(
                 message=message,
                 generation_info=dict(finish_reason=res.get("finish_reason")),
@@ -446,12 +455,13 @@ class ChatChatGLM(BaseChatModel):
         params = {**params, **kwargs, "stream": True}
 
         default_chunk_class = AIMessageChunk
-        async for chunk in await acompletion_with_retry(
+        async for event in await acompletion_with_retry(
             self, messages=message_dicts, run_manager=run_manager, **params
         ):
-            if len(chunk["choices"]) == 0:
-                continue
-            delta = chunk["choices"][0]["delta"]
+            if len(event):
+                delta = {"role": "assistant", "content": event[-1]}
+            else:
+                delta = {"role": "assistant", "content": ""}
             chunk = _convert_delta_to_message_chunk(delta, default_chunk_class)
             default_chunk_class = chunk.__class__
             yield ChatGenerationChunk(message=chunk)

@@ -225,6 +225,7 @@ class ApiRequest:
             with response as r:
                 for chunk in r.iter_text(None):
                     if as_json and chunk:
+                        print(chunk)
                         yield json.loads(chunk)
                     elif chunk.strip():
                         yield chunk
@@ -239,6 +240,8 @@ class ApiRequest:
             logger.error(e)
             yield {"code": 500, "errorMsg": msg}
         except Exception as e:
+            import traceback
+            print(traceback.format_exc())
             logger.error(e)
             yield {"code": 500, "errorMsg": str(e)}
 

@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse
 from configs.model_config import llm_model_dict, LLM_MODEL
 from server.chat.utils import wrap_done
 from models.chatglm import ChatChatGLM
+from langchain.llms import ChatGLM, OpenAI
 from langchain.chat_models import ChatOpenAI
 from langchain import LLMChain
 from langchain.callbacks import AsyncIteratorCallbackHandler
