@@ -72,11 +72,6 @@ def _create_retry_decorator(
     import zhipuai
 
     errors = [
-        # zhipuai.error.Timeout,
-        # zhipuai.error.APIError,
-        # zhipuai.error.APIConnectionError,
-        # zhipuai.error.RateLimitError,
-        # zhipuai.error.ServiceUnavailableError,
         Exception,
     ]
     return create_base_retry_decorator(
@@ -96,15 +91,17 @@ async def acompletion_with_retry(
     async def _completion_with_retry(**kwargs: Any) -> Any:
         # Use ChatGLM's async api https://open.bigmodel.cn/api/paas/v3/model-api/chatglm_pro/invoke
         m_kwargs = copy.deepcopy(kwargs)
-        m_kwargs["prompt"] = kwargs["messages"]
+        if (len(kwargs["messages"]) >= 2 and len(kwargs["messages"])//2 
+            and kwargs["messages"][-1]["role"] == kwargs["messages"][-2]["role"]):
+            m_kwargs["prompt"] = [msg for msg in kwargs["messages"][:-2]] + [kwargs["messages"][-1]]
+        else:
+            m_kwargs["prompt"] = kwargs["messages"]
         if m_kwargs.get("streaming") or m_kwargs.get("stream"):
             async def async_gen(**m_kwargs):
-                print("_acompletion_with_retry sse:", m_kwargs)
                 for event in llm.client.sse_invoke(**m_kwargs).events():
                     yield event.data
             return alist(async_gen(**m_kwargs))
         else:
-            print("_acompletion_with_retry:", m_kwargs)
             return llm.client.invoke(**m_kwargs)
 
     return await _completion_with_retry(**kwargs)
@@ -349,12 +346,14 @@ class ChatChatGLM(BaseChatModel):
         @retry_decorator
         def _completion_with_retry(**kwargs: Any) -> Any:
             m_kwargs = copy.deepcopy(kwargs)
-            m_kwargs["prompt"] = kwargs["messages"]
+            if (len(kwargs["messages"]) >= 2 and len(kwargs["messages"])//2 
+                and kwargs["messages"][-1]["role"] == kwargs["messages"][-2]["role"]):
+                m_kwargs["prompt"] = [msg for msg in kwargs["messages"][:-2]] + [kwargs["messages"][-1]]
+            else:
+                m_kwargs["prompt"] = kwargs["messages"]
             if m_kwargs.get("streaming") or m_kwargs.get("stream"):
-                print("_completion_with_retry sse:", m_kwargs)
                 return self.client.sse_invoke(**m_kwargs)
             else:
-                print("_completion_with_retry:", m_kwargs)
                 return self.client.invoke(**m_kwargs)
         return _completion_with_retry(**kwargs)
 
