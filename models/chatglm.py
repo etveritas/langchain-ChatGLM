@@ -89,11 +89,13 @@ async def acompletion_with_retry(
 
     @retry_decorator
     async def _completion_with_retry(**kwargs: Any) -> Any:
-        # Use ChatGLM's async api https://open.bigmodel.cn/api/paas/v3/model-api/chatglm_pro/invoke
+        # Use ChatGLM's async api 
+        # https://open.bigmodel.cn/api/paas/v3/model-api/chatglm_pro/invoke
         m_kwargs = copy.deepcopy(kwargs)
         if (len(kwargs["messages"]) >= 2 and len(kwargs["messages"])//2 
             and kwargs["messages"][-1]["role"] == kwargs["messages"][-2]["role"]):
-            m_kwargs["prompt"] = [msg for msg in kwargs["messages"][:-2]] + [kwargs["messages"][-1]]
+            m_kwargs["prompt"] = ([msg for msg in kwargs["messages"][:-2]] 
+                                  + [kwargs["messages"][-1]])
         else:
             m_kwargs["prompt"] = kwargs["messages"]
         if m_kwargs.get("streaming") or m_kwargs.get("stream"):
@@ -348,7 +350,8 @@ class ChatChatGLM(BaseChatModel):
             m_kwargs = copy.deepcopy(kwargs)
             if (len(kwargs["messages"]) >= 2 and len(kwargs["messages"])//2 
                 and kwargs["messages"][-1]["role"] == kwargs["messages"][-2]["role"]):
-                m_kwargs["prompt"] = [msg for msg in kwargs["messages"][:-2]] + [kwargs["messages"][-1]]
+                m_kwargs["prompt"] = ([msg for msg in kwargs["messages"][:-2]] 
+                                    + [kwargs["messages"][-1]])
             else:
                 m_kwargs["prompt"] = kwargs["messages"]
             if m_kwargs.get("streaming") or m_kwargs.get("stream"):
@@ -511,7 +514,8 @@ class ChatChatGLM(BaseChatModel):
         if self.chatglm_proxy:
             import zhipuai
             zhipuai.api_key = self.chatglm_api_key
-            # zhipuai.proxy = {"http": self.chatglm_proxy, "https": self.chatglm_proxy}  # type: ignore[assignment]  # noqa: E501
+            # zhipuai.proxy = {"http": self.chatglm_proxy, "https": self.chatglm_proxy} 
+            # type: ignore[assignment]  # noqa: E501
         return {**self._default_params, **chatglm_creds}
 
     def _get_invocation_params(
