@@ -225,7 +225,6 @@ class ApiRequest:
             with response as r:
                 for chunk in r.iter_text(None):
                     if as_json and chunk:
-                        print(chunk)
                         yield json.loads(chunk)
                     elif chunk.strip():
                         yield chunk
