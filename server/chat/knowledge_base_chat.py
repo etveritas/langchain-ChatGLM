@@ -16,9 +16,13 @@ from server.chat.utils import History
 from server.knowledge_base.kb_service.base import KBService, KBServiceFactory
 import json
 import os
+import numpy as np
 from urllib.parse import urlencode
 from server.knowledge_base.kb_doc_api import search_docs
 
+
+def sigmoid(x):
+    return 1/(1+np.exp(-x))
 
 def knowledge_base_chat(query: str = Body(..., description="用户输入", examples=["你好"]),
                         knowledge_base_name: str = Body(..., description="知识库名称", examples=["samples"]),
@@ -78,6 +82,9 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
 
         chain = LLMChain(prompt=chat_prompt, llm=model)
 
+        # combine prompt
+        prompt_comb = await chain.aprep_prompts([{"context": context, "question": query}])
+
         # Begin a task that runs in the background.
         task = asyncio.create_task(wrap_done(
             chain.acall({"context": context, "question": query}),
@@ -92,21 +99,23 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
             else:
                 parameters = urlencode({"knowledge_base_name": knowledge_base_name, "file_name":filename})
                 url = f"{request.base_url}knowledge_base/download_doc?" + parameters
-            text = f"""出处 [{inum + 1}] [{filename}]({url}) \n\n{doc.page_content}\n\n"""
+            text = f"""出处 [{inum + 1}] [{filename}]({url}) \n\n{doc.page_content}\n\n 相似度：{sigmoid((1100-doc.score)/1100)}\n\n"""
             source_documents.append(text)
 
         if stream:
             async for token in callback.aiter():
                 # Use server-sent-events to stream the response
                 yield json.dumps({"answer": token,
-                                  "docs": source_documents},
+                                  "docs": source_documents,
+                                  "prompt": prompt_comb[0][0].to_string()},
                                  ensure_ascii=False)
         else:
             answer = ""
             async for token in callback.aiter():
                 answer += token
             yield json.dumps({"answer": answer,
-                              "docs": source_documents},
+                              "docs": source_documents,
+                              "prompt": prompt_comb[0][0].to_string()},
                              ensure_ascii=False)
 
         await task
