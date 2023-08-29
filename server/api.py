@@ -17,6 +17,7 @@ from server.knowledge_base.kb_api import list_kbs, create_kb, delete_kb
 from server.knowledge_base.kb_doc_api import (list_docs, upload_doc, delete_doc,
                                               update_doc, download_doc, recreate_vector_store,
                                               search_docs, DocumentWithScore)
+from server.fellback import fellback_save
 from server.utils import BaseResponse, ListResponse, FastAPI, MakeFastAPIOffline
 from typing import List
 
@@ -122,6 +123,12 @@ def create_app():
              tags=["Knowledge Base Management"],
              summary="根据content中文档重建向量库，流式输出处理进度。"
              )(recreate_vector_store)
+
+    # 反馈模块
+    app.post("/fellback/fellback_save",
+            tags=["Fellback"],
+            summary="获取用户反馈信息。"
+            )(fellback_save)
 
     return app
 
