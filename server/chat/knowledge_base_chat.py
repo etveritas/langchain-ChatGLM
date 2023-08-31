@@ -18,6 +18,7 @@ import json
 import os
 import uuid
 import numpy as np
+from collections import defaultdict
 from urllib.parse import urlencode
 from server.knowledge_base.kb_doc_api import search_docs
 
@@ -93,7 +94,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
         )
 
         source_documents = []
-        reference_list = []
+        reference_list = defaultdict(list)
         for inum, doc in enumerate(docs):
             filename = os.path.split(doc.metadata["source"])[-1]
             if local_doc_url:
@@ -102,9 +103,10 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
                 parameters = urlencode({"knowledge_base_name": knowledge_base_name, "file_name":filename})
                 url = f"{request.base_url}knowledge_base/download_doc?" + parameters
             text = f"""出处 [{inum + 1}] [{filename}]({url}) \n\n{doc.page_content}\n\n 相似度：{1100-doc.score}\n\n"""
-            reference_list.append([filename, doc.page_content, str(int(1100-doc.score))])
+            
+            reference_list[filename].append([doc.page_content, str(int(1100-doc.score))])
             source_documents.append(text)
-
+        reference_list = dict(reference_list)
         unq_id = uuid.uuid1()
         if stream:
             async for token in callback.aiter():
