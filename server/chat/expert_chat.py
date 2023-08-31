@@ -93,7 +93,7 @@ def expert_chat(query: str = Body(..., description="用户输入", examples=["�
         chain = LLMChain(prompt=chat_prompt, llm=model)
 
         # combine prompt
-        prompt_comb = await chain.aprep_prompts([{"context": context, "question": query}])
+        prompt_comb = chain.prep_prompts([{"context": context, "question": query}])
 
         # Begin a task that runs in the background.
         task = asyncio.create_task(wrap_done(
