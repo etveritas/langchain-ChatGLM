@@ -92,7 +92,7 @@ async def acompletion_with_retry(
         # Use ChatGLM's async api 
         # https://open.bigmodel.cn/api/paas/v3/model-api/chatglm_pro/invoke
         m_kwargs = copy.deepcopy(kwargs)
-        if (len(kwargs["messages"]) >= 2 and len(kwargs["messages"])//2 
+        if (len(kwargs["messages"]) >= 2 and len(kwargs["messages"])//2 == 0
             and kwargs["messages"][-1]["role"] == kwargs["messages"][-2]["role"]):
             m_kwargs["prompt"] = ([msg for msg in kwargs["messages"][:-2]] 
                                   + [kwargs["messages"][-1]])
@@ -348,7 +348,7 @@ class ChatChatGLM(BaseChatModel):
         @retry_decorator
         def _completion_with_retry(**kwargs: Any) -> Any:
             m_kwargs = copy.deepcopy(kwargs)
-            if (len(kwargs["messages"]) >= 2 and len(kwargs["messages"])//2 
+            if (len(kwargs["messages"]) >= 2 and len(kwargs["messages"])//2 == 0
                 and kwargs["messages"][-1]["role"] == kwargs["messages"][-2]["role"]):
                 m_kwargs["prompt"] = ([msg for msg in kwargs["messages"][:-2]] 
                                     + [kwargs["messages"][-1]])
