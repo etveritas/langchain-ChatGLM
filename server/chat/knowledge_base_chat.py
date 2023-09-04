@@ -2,6 +2,7 @@ from fastapi import Body, Request
 from fastapi.responses import StreamingResponse
 from configs.model_config import (llm_model_dict, LLM_MODEL, PROMPT_TEMPLATE,
                                   VECTOR_SEARCH_TOP_K, SCORE_THRESHOLD)
+from configs.model_config import (QTPL_PROMPT, KTPL_PROMPT)
 from server.chat.utils import wrap_done
 from server.utils import BaseResponse
 from langchain.chat_models import ChatOpenAI
@@ -80,12 +81,15 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
         context = "\n".join([doc.page_content for doc in docs])
 
         chat_prompt = ChatPromptTemplate.from_messages(
-            [i.to_msg_tuple() for i in history] + [("human", PROMPT_TEMPLATE)])
+            [i.to_msg_tuple() for i in history]
+            + [("human", QTPL_PROMPT)]
+            + [("human", KTPL_PROMPT)]
+        )
 
         chain = LLMChain(prompt=chat_prompt, llm=model)
 
         # combine prompt
-        prompt_comb = await chain.aprep_prompts([{"context": context, "question": query}])
+        prompt_comb = chain.prep_prompts([{"context": context, "question": query}])
 
         # Begin a task that runs in the background.
         task = asyncio.create_task(wrap_done(

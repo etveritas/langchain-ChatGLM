@@ -101,7 +101,7 @@ def dialogue_page(api: ApiRequest):
                 if error_msg := check_error_msg(t): # check whether error occured
                     st.error(error_msg)
                     break
-                text += t
+                text += t["answer"]
                 chat_box.update_msg(text)
             chat_box.update_msg(text, streaming=False)  # 更新最终的字符串，去除光标
         elif dialogue_mode == "知识库问答":
