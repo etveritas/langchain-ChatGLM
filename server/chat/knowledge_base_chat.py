@@ -57,8 +57,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
         callback = AsyncIteratorCallbackHandler()
         if "gpt" in LLM_MODEL:
             model = ChatOpenAI(
-                top_p=0.9,
-                temperature=0.6,
+                temperature=0.1,
                 streaming=True,
                 verbose=True,
                 callbacks=[callback],
@@ -68,8 +67,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
             )
         elif "glm" in LLM_MODEL:
             model = ChatChatGLM(
-                top_p=0.9,
-                temperature=0.6,
+                temperature=0.1,
                 streaming=True,
                 verbose=True,
                 callbacks=[callback],
