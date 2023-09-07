@@ -57,17 +57,16 @@ def chat(query: str = Body(..., description="用户输入", examples=["恼羞成
 
         chat_prompt = ChatPromptTemplate.from_messages(
             [i.to_msg_tuple() for i in history]
-            + [("human", QTPL_PROMPT)]
             + [("human", KTPL_PROMPT)]
+            + [("human", QTPL_PROMPT)]
         )
         chain = LLMChain(prompt=chat_prompt, llm=model)
 
         # combine prompt
-        prompt_comb = chain.prep_prompts([{"context": "", "question": query}])
-
+        prompt_comb = chain.prep_prompts([{"context": query, "question": query}])
         # Begin a task that runs in the background.
         task = asyncio.create_task(wrap_done(
-            chain.acall({"context": "", "question": query}),
+            chain.acall({"context": query, "question": query}),
             callback.done),
         )
 

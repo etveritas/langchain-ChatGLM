@@ -82,8 +82,8 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
 
         chat_prompt = ChatPromptTemplate.from_messages(
             [i.to_msg_tuple() for i in history]
-            + [("human", QTPL_PROMPT)]
             + [("human", KTPL_PROMPT)]
+            + [("human", QTPL_PROMPT)]
         )
 
         chain = LLMChain(prompt=chat_prompt, llm=model)
