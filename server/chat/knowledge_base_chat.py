@@ -136,5 +136,83 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
 
         await task
 
-    return StreamingResponse(knowledge_base_chat_iterator(query, kb, top_k, history, model_name),
+    def syn_knowledge_base_chat_iterator(query: str,
+                                           kb: KBService,
+                                           top_k: int,
+                                           history: Optional[List[History]],
+                                           model_name: str = LLM_MODEL,
+                                           ) -> AsyncIterable[str]:
+        if "gpt" in LLM_MODEL:
+            model = ChatOpenAI(
+                temperature=0.1,
+                streaming=False,
+                verbose=True,
+                openai_api_key=llm_model_dict[model_name]["api_key"],
+                openai_api_base=llm_model_dict[model_name]["api_base_url"],
+                model_name=model_name,
+            openai_proxy=llm_model_dict[model_name].get("openai_proxy")
+            )
+        elif "glm" in LLM_MODEL:
+            model = ChatChatGLM(
+                temperature=0.1,
+                streaming=False,
+                verbose=True,
+                chatglm_api_key=llm_model_dict[model_name]["api_key"],
+                chatglm_api_base=llm_model_dict[model_name]["api_base_url"],
+                model_name=model_name
+            )
+        docs = search_docs(query, knowledge_base_name, top_k, score_threshold)
+        context = "\n".join([doc.page_content for doc in docs])
+
+        # input_msg = History(role="user", content=PROMPT_TEMPLATE).to_msg_template(False)
+        chat_prompt = ChatPromptTemplate.from_messages(
+            [i.to_msg_tuple() for i in history]
+            + [("human", KTPL_PROMPT)]
+            + [("human", QTPL_PROMPT)]
+        )
+
+        chain = LLMChain(prompt=chat_prompt, llm=model)
+
+        # combine prompt
+        prompt_comb = chain.prep_prompts([{"context": context, "question": query}])
+
+        # Begin a task that runs in the background.
+        res_iter = chain.run({"context": context, "question": query})
+
+        source_documents = []
+        reference_list = defaultdict(list)
+        for inum, doc in enumerate(docs):
+            filename = os.path.split(doc.metadata["source"])[-1]
+            if local_doc_url:
+                url = "file://" + doc.metadata["source"]
+            else:
+                parameters = urlencode({"knowledge_base_name": knowledge_base_name, "file_name":filename})
+                url = f"{request.base_url}knowledge_base/download_doc?" + parameters
+            text = f"""出处 [{inum + 1}] [{filename}]({url}) \n\n{doc.page_content}\n\n 相似度：{1100-doc.score}\n\n"""
+            
+            reference_list[filename].append([doc.page_content, str(int(1100-doc.score))])
+            source_documents.append(text)
+        reference_list = dict(reference_list)
+        unq_id = uuid.uuid1()
+        if stream:
+            for token in res_iter:
+                # Use server-sent-events to stream the response
+                yield json.dumps({"uuid": str(unq_id),
+                                  "answer": token,
+                                  "docs": source_documents,
+                                  "reference": reference_list,
+                                  "prompt": prompt_comb[0][0].to_string()},
+                                 ensure_ascii=False)
+        else:
+            answer = ""
+            for token in res_iter:
+                answer += token
+            yield json.dumps({"uuid": str(unq_id),
+                              "answer": answer,
+                              "docs": source_documents,
+                              "reference": reference_list,
+                              "prompt": prompt_comb[0][0].to_string()},
+                             ensure_ascii=False)
+
+    return StreamingResponse(syn_knowledge_base_chat_iterator(query, kb, top_k, history, model_name),
                              media_type="text/event-stream")
