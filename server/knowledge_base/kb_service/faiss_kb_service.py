@@ -38,11 +38,11 @@ def load_faiss_vector_store(
         os.makedirs(vs_path)
 
     if "index.faiss" in os.listdir(vs_path):
-        search_index = MyFAISS.load_local(vs_path, embeddings, normalize_L2=True)
+        search_index = MyFAISS.load_local(vs_path, embeddings, normalize_L2=False)
     else:
         # create an empty vector store
         doc = Document(page_content="init", metadata={})
-        search_index = MyFAISS.from_documents([doc], embeddings, normalize_L2=True)
+        search_index = MyFAISS.from_documents([doc], embeddings, normalize_L2=False)
         ids = [k for k, v in search_index.docstore._dict.items()]
         search_index.delete(ids)
         search_index.save_local(vs_path)
@@ -66,7 +66,7 @@ class FaissKBService(KBService):
     kb_path: str
 
     def vs_type(self) -> str:
-        return SupportedVSType.MyFAISS
+        return SupportedVSType.FAISS
 
     def get_vs_path(self):
         return os.path.join(self.get_kb_path(), "vector_store")

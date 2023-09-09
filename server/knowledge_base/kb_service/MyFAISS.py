@@ -55,8 +55,9 @@ class MyFAISS(FAISS):
         id_set = set()
         store_len = len(self.index_to_docstore_id)
         rearrange_id_list = False
+        score_threshold = kwargs.get("score_threshold")
         for j, i in enumerate(indices[0]):
-            if i == -1 or 0 < self.score_threshold < scores[0][j]:
+            if i == -1 or 0 < score_threshold < scores[0][j]:
                 # This happens when not enough docs are returned.
                 continue
             if i in self.index_to_docstore_id:
@@ -70,7 +71,7 @@ class MyFAISS(FAISS):
                 if not isinstance(doc, Document):
                     raise ValueError(f"Could not find document for id {_id}, got {doc}")
                 doc.metadata["score"] = int(scores[0][j])
-                docs.append(doc)
+                docs.append((doc, scores[0][j]))
                 continue
 
             id_set.add(i)
@@ -99,7 +100,7 @@ class MyFAISS(FAISS):
                     break
         if (not self.chunk_conent) or (not rearrange_id_list):
             return docs
-        if len(id_set) == 0 and self.score_threshold > 0:
+        if len(id_set) == 0 and score_threshold > 0:
             return []
         id_list = sorted(list(id_set))
         id_lists = self.seperate_list(id_list)
@@ -117,6 +118,6 @@ class MyFAISS(FAISS):
                 raise ValueError(f"Could not find document for id {_id}, got {doc}")
             doc_score = min([scores[0][id] for id in [indices[0].tolist().index(i) for i in id_seq if i in indices[0]]])
             doc.metadata["score"] = int(doc_score)
-            docs.append(doc)
+            docs.append((doc, doc_score))
         return docs
 
