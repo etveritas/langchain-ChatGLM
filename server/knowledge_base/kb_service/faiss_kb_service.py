@@ -16,6 +16,7 @@ from typing import List, Dict, Optional
 from langchain.docstore.document import Document
 from server.utils import torch_gc, embedding_device
 
+from .MyFAISS import MyFAISS
 
 _VECTOR_STORE_TICKS = {}
 
@@ -27,7 +28,7 @@ def load_faiss_vector_store(
         embed_device: str = embedding_device(),
         embeddings: Embeddings = None,
         tick: int = 0,  # tick will be changed by upload_doc etc. and make cache refreshed.
-) -> FAISS:
+) -> MyFAISS:
     print(f"loading vector store in '{knowledge_base_name}'.")
     vs_path = get_vs_path(knowledge_base_name)
     if embeddings is None:
@@ -37,11 +38,11 @@ def load_faiss_vector_store(
         os.makedirs(vs_path)
 
     if "index.faiss" in os.listdir(vs_path):
-        search_index = FAISS.load_local(vs_path, embeddings, normalize_L2=True)
+        search_index = MyFAISS.load_local(vs_path, embeddings, normalize_L2=True)
     else:
         # create an empty vector store
         doc = Document(page_content="init", metadata={})
-        search_index = FAISS.from_documents([doc], embeddings, normalize_L2=True)
+        search_index = MyFAISS.from_documents([doc], embeddings, normalize_L2=True)
         ids = [k for k, v in search_index.docstore._dict.items()]
         search_index.delete(ids)
         search_index.save_local(vs_path)
@@ -65,7 +66,7 @@ class FaissKBService(KBService):
     kb_path: str
 
     def vs_type(self) -> str:
-        return SupportedVSType.FAISS
+        return SupportedVSType.MyFAISS
 
     def get_vs_path(self):
         return os.path.join(self.get_kb_path(), "vector_store")
@@ -73,14 +74,14 @@ class FaissKBService(KBService):
     def get_kb_path(self):
         return os.path.join(KB_ROOT_PATH, self.kb_name)
 
-    def load_vector_store(self) -> FAISS:
+    def load_vector_store(self) -> MyFAISS:
         return load_faiss_vector_store(
             knowledge_base_name=self.kb_name,
             embed_model=self.embed_model,
             tick=_VECTOR_STORE_TICKS.get(self.kb_name, 0),
         )
 
-    def save_vector_store(self, vector_store: FAISS = None):
+    def save_vector_store(self, vector_store: MyFAISS = None):
         vector_store = vector_store or self.load_vector_store()
         vector_store.save_local(self.vs_path)
         return vector_store
