@@ -74,14 +74,14 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
                 streaming=True,
                 verbose=True,
                 callbacks=[callback],
-                chatglm_api_key=llm_model_dict[LLM_MODEL]["api_key"],
-                chatglm_api_base=llm_model_dict[LLM_MODEL]["api_base_url"],
-                model_name=LLM_MODEL
+                chatglm_api_key=llm_model_dict[model_name]["api_key"],
+                chatglm_api_base=llm_model_dict[model_name]["api_base_url"],
+                model_name=model_name
             )
         docs = search_docs(query, knowledge_base_name, top_k, score_threshold)
         context = "\n".join([doc.page_content for doc in docs])
 
-        input_msg = History(role="user", content=PROMPT_TEMPLATE).to_msg_template(False)
+        # input_msg = History(role="user", content=PROMPT_TEMPLATE).to_msg_template(False)
         chat_prompt = ChatPromptTemplate.from_messages(
             [i.to_msg_tuple() for i in history]
             + [("human", KTPL_PROMPT)]

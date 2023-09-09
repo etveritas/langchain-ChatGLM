@@ -64,37 +64,38 @@ def dialogue_page(api: ApiRequest):
                                      key="dialogue_mode",
                                      )
 
-        def on_llm_change():
-            st.session_state["prev_llm_model"] = llm_model
+        # def on_llm_change():
+        #     st.session_state["prev_llm_model"] = llm_model
 
-        def llm_model_format_func(x):
-            if x in running_models:
-                return f"{x} (Running)"
-            return x
+        # def llm_model_format_func(x):
+        #     if x in running_models:
+        #         return f"{x} (Running)"
+        #     return x
 
-        running_models = api.list_running_models()
-        config_models = api.list_config_models()
-        for x in running_models:
-            if x in config_models:
-                config_models.remove(x)
-        llm_models = running_models + config_models
-        if "prev_llm_model" not in st.session_state:
-            index = llm_models.index(LLM_MODEL)
-        else:
-            index = 0
-        llm_model = st.selectbox("选择LLM模型：",
-                                llm_models,
-                                index,
-                                format_func=llm_model_format_func,
-                                on_change=on_llm_change,
-                                # key="llm_model",
-                                )
-        if (st.session_state.get("prev_llm_model") != llm_model
-            and not get_model_worker_config(llm_model).get("online_api")):
-            with st.spinner(f"正在加载模型： {llm_model}"):
-                r = api.change_llm_model(st.session_state.get("prev_llm_model"), llm_model)
-            st.session_state["prev_llm_model"] = llm_model
+        # running_models = api.list_running_models()
+        # config_models = api.list_config_models()
+        # for x in running_models:
+        #     if x in config_models:
+        #         config_models.remove(x)
+        # llm_models = running_models + config_models
+        # if "prev_llm_model" not in st.session_state:
+        #     index = llm_models.index(LLM_MODEL)
+        # else:
+        #     index = 0
+        # llm_model = st.selectbox("选择LLM模型：",
+        #                         llm_models,
+        #                         index,
+        #                         format_func=llm_model_format_func,
+        #                         on_change=on_llm_change,
+        #                         # key="llm_model",
+        #                         )
+        # if (st.session_state.get("prev_llm_model") != llm_model
+        #     and not get_model_worker_config(llm_model).get("online_api")):
+        #     with st.spinner(f"正在加载模型： {llm_model}"):
+        #         r = api.change_llm_model(st.session_state.get("prev_llm_model"), llm_model)
+        #     st.session_state["prev_llm_model"] = llm_model
 
+        llm_model = LLM_MODEL
         history_len = st.number_input("历史对话轮数：", 0, 10, HISTORY_LEN)
 
         def on_kb_change():
