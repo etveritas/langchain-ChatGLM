@@ -10,8 +10,18 @@ import os
 
 
 class MyFAISS(FAISS):
-    def __init__(self, expand_size=500, is_expand=True):
-        super().__init__()
+    def __init__(self,
+        embedding_function: Callable,
+        index: Any,
+        docstore: Docstore,
+        index_to_docstore_id: Dict[int, str],
+        expand_size=500, is_expand=True, 
+        **kwargs: Any,
+    ):
+        super().__init__(embedding_function=embedding_function,
+                         index=index, 
+                         docstore=docstore,
+                         index_to_docstore_id=index_to_docstore_id,**kwargs)
         self.chunk_size = expand_size
         self.chunk_conent = is_expand
 
@@ -29,9 +39,12 @@ class MyFAISS(FAISS):
         return lists
 
     def similarity_search_with_score_by_vector(
-            self, embedding: List[float], k: int = 4, 
-            filter: Optional[Dict[str, Any]] = None,
-            fetch_k: int = 20,
+        self,
+        embedding: List[float],
+        k: int = 4,
+        filter: Optional[Dict[str, Any]] = None,
+        fetch_k: int = 20,
+        **kwargs: Any,
     ) -> List[Document]:
         faiss = dependable_faiss_import()
         vector = np.array([embedding], dtype=np.float32)
