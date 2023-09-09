@@ -40,6 +40,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
                                                            "content": "虎头虎脑"}]]
                                                       ),
                         stream: bool = Body(False, description="流式输出"),
+                        model_name: str = Body(LLM_MODEL, description="LLM 模型名称。"),
                         local_doc_url: bool = Body(False, description="知识文件返回本地路径(true)或URL(false)"),
                         request: Request = None,
                         ):
@@ -47,12 +48,13 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
     if kb is None:
         return BaseResponse(code=404, msg=f"未找到知识库 {knowledge_base_name}")
 
-    history = [History(**h) if isinstance(h, dict) else h for h in history]
+    history = [History.from_data(h) for h in history]
 
     async def knowledge_base_chat_iterator(query: str,
                                            kb: KBService,
                                            top_k: int,
                                            history: Optional[List[History]],
+                                           model_name: str = LLM_MODEL,
                                            ) -> AsyncIterable[str]:
         callback = AsyncIteratorCallbackHandler()
         if "gpt" in LLM_MODEL:
@@ -61,9 +63,10 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
                 streaming=True,
                 verbose=True,
                 callbacks=[callback],
-                openai_api_key=llm_model_dict[LLM_MODEL]["api_key"],
-                openai_api_base=llm_model_dict[LLM_MODEL]["api_base_url"],
-                model_name=LLM_MODEL
+                openai_api_key=llm_model_dict[model_name]["api_key"],
+                openai_api_base=llm_model_dict[model_name]["api_base_url"],
+                model_name=model_name,
+            openai_proxy=llm_model_dict[model_name].get("openai_proxy")
             )
         elif "glm" in LLM_MODEL:
             model = ChatChatGLM(
@@ -78,6 +81,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
         docs = search_docs(query, knowledge_base_name, top_k, score_threshold)
         context = "\n".join([doc.page_content for doc in docs])
 
+        input_msg = History(role="user", content=PROMPT_TEMPLATE).to_msg_template(False)
         chat_prompt = ChatPromptTemplate.from_messages(
             [i.to_msg_tuple() for i in history]
             + [("human", KTPL_PROMPT)]
@@ -132,5 +136,5 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
 
         await task
 
-    return StreamingResponse(knowledge_base_chat_iterator(query, kb, top_k, history),
+    return StreamingResponse(knowledge_base_chat_iterator(query, kb, top_k, history, model_name),
                              media_type="text/event-stream")

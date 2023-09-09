@@ -69,30 +69,39 @@ def search_engine_chat(query: str = Body(..., description="用户输入", exampl
                                                           "content": "虎头虎脑"}]]
                                                      ),
                        stream: bool = Body(False, description="流式输出"),
+                       model_name: str = Body(LLM_MODEL, description="LLM 模型名称。"),
                        ):
     if search_engine_name not in SEARCH_ENGINES.keys():
         return BaseResponse(code=404, msg=f"未支持搜索引擎 {search_engine_name}")
+
+    if search_engine_name == "bing" and not BING_SUBSCRIPTION_KEY:
+        return BaseResponse(code=404, msg=f"要使用Bing搜索引擎，需要设置 `BING_SUBSCRIPTION_KEY`")
+
+    history = [History.from_data(h) for h in history]
 
     async def search_engine_chat_iterator(query: str,
                                           search_engine_name: str,
                                           top_k: int,
                                           history: Optional[List[History]],
+                                          model_name: str = LLM_MODEL,
                                           ) -> AsyncIterable[str]:
         callback = AsyncIteratorCallbackHandler()
         model = ChatOpenAI(
             streaming=True,
             verbose=True,
             callbacks=[callback],
-            openai_api_key=llm_model_dict[LLM_MODEL]["api_key"],
-            openai_api_base=llm_model_dict[LLM_MODEL]["api_base_url"],
-            model_name=LLM_MODEL
+            openai_api_key=llm_model_dict[model_name]["api_key"],
+            openai_api_base=llm_model_dict[model_name]["api_base_url"],
+            model_name=model_name,
+            openai_proxy=llm_model_dict[model_name].get("openai_proxy")
         )
 
         docs = lookup_search_engine(query, search_engine_name, top_k)
         context = "\n".join([doc.page_content for doc in docs])
 
+        input_msg = History(role="user", content=PROMPT_TEMPLATE).to_msg_template(False)
         chat_prompt = ChatPromptTemplate.from_messages(
-            [i.to_msg_tuple() for i in history] + [("human", PROMPT_TEMPLATE)])
+            [i.to_msg_template() for i in history] + [input_msg])
 
         chain = LLMChain(prompt=chat_prompt, llm=model)
 
@@ -117,10 +126,10 @@ def search_engine_chat(query: str = Body(..., description="用户输入", exampl
             answer = ""
             async for token in callback.aiter():
                 answer += token
-            yield json.dumps({"answer": token,
+            yield json.dumps({"answer": answer,
                               "docs": source_documents},
                              ensure_ascii=False)
         await task
 
-    return StreamingResponse(search_engine_chat_iterator(query, search_engine_name, top_k, history),
+    return StreamingResponse(search_engine_chat_iterator(query, search_engine_name, top_k, history, model_name),
                              media_type="text/event-stream")

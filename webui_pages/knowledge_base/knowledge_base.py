@@ -4,7 +4,7 @@ from st_aggrid import AgGrid, JsCode
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 import pandas as pd
 from server.knowledge_base.utils import get_file_path, LOADER_DICT
-from server.knowledge_base.kb_service.base import get_kb_details, get_kb_doc_details
+from server.knowledge_base.kb_service.base import get_kb_details, get_kb_file_details
 from typing import Literal, Dict, Tuple
 from configs.model_config import embedding_model_dict, kbs_config, EMBEDDING_MODEL, DEFAULT_VS_TYPE
 import os
@@ -118,7 +118,7 @@ def knowledge_base_page(api: ApiRequest):
                     vector_store_type=vs_type,
                     embed_model=embed_model,
                 )
-                st.toast(ret["msg"])
+                st.toast(ret.get("msg", " "))
                 st.session_state["selected_kb_name"] = kb_name
                 st.experimental_rerun()
 
@@ -138,19 +138,21 @@ def knowledge_base_page(api: ApiRequest):
                 # use_container_width=True,
                 disabled=len(files) == 0,
         ):
-            for f in files:
-                ret = api.upload_kb_doc(f, kb)
-                if ret["code"] == 200:
-                    st.toast(ret["msg"], icon="✔")
-                else:
-                    st.toast(ret["msg"], icon="✖")
+            data = [{"file": f, "knowledge_base_name": kb, "not_refresh_vs_cache": True} for f in files]
+            data[-1]["not_refresh_vs_cache"]=False
+            for k in data:
+                ret = api.upload_kb_doc(**k)
+                if msg := check_success_msg(ret):
+                    st.toast(msg, icon="✔")
+                elif msg := check_error_msg(ret):
+                    st.toast(msg, icon="✖")
             st.session_state.files = []
 
         st.divider()
 
         # 知识库详情
         # st.info("请选择文件，点击按钮进行操作。")
-        doc_details = pd.DataFrame(get_kb_doc_details(kb))
+        doc_details = pd.DataFrame(get_kb_file_details(kb))
         if not len(doc_details):
             st.info(f"知识库 `{kb}` 中暂无文件")
         else:
@@ -158,7 +160,7 @@ def knowledge_base_page(api: ApiRequest):
             st.info("知识库中包含源文件与向量库，请从下表中选择文件后操作")
             doc_details.drop(columns=["kb_name"], inplace=True)
             doc_details = doc_details[[
-                "No", "file_name", "document_loader", "text_splitter", "in_folder", "in_db",
+                "No", "file_name", "document_loader", "docs_count", "in_folder", "in_db",
             ]]
             # doc_details["in_folder"] = doc_details["in_folder"].replace(True, "✓").replace(False, "×")
             # doc_details["in_db"] = doc_details["in_db"].replace(True, "✓").replace(False, "×")
@@ -170,7 +172,8 @@ def knowledge_base_page(api: ApiRequest):
                     # ("file_ext", "文档类型"): {},
                     # ("file_version", "文档版本"): {},
                     ("document_loader", "文档加载器"): {},
-                    ("text_splitter", "分词器"): {},
+                    ("docs_count", "文档数量"): {},
+                    # ("text_splitter", "分词器"): {},
                     # ("create_time", "创建时间"): {},
                     ("in_folder", "源文件"): {"cellRenderer": cell_renderer},
                     ("in_db", "向量库"): {"cellRenderer": cell_renderer},
@@ -186,7 +189,8 @@ def knowledge_base_page(api: ApiRequest):
                 custom_css={
                     "#gridToolBar": {"display": "none"},
                 },
-                allow_unsafe_jscode=True
+                allow_unsafe_jscode=True,
+                enable_enterprise_modules=False
             )
 
             selected_rows = doc_grid.get("selected_rows", [])
@@ -235,26 +239,27 @@ def knowledge_base_page(api: ApiRequest):
             ):
                 for row in selected_rows:
                     ret = api.delete_kb_doc(kb, row["file_name"], True)
-                    st.toast(ret["msg"])
+                    st.toast(ret.get("msg", " "))
                 st.experimental_rerun()
 
         st.divider()
 
         cols = st.columns(3)
 
-        # todo: freezed
         if cols[0].button(
                 "依据源文件重建向量库",
                 # help="无需上传文件，通过其它方式将文档拷贝到对应知识库content目录下，点击本按钮即可重建知识库。",
                 use_container_width=True,
                 type="primary",
         ):
-            with st.spinner("向量库重构中"):
+            with st.spinner("向量库重构中，请耐心等待，勿刷新或关闭页面。"):
                 empty = st.empty()
                 empty.progress(0.0, "")
                 for d in api.recreate_vector_store(kb):
-                    print(d)
-                    empty.progress(d["finished"] / d["total"], f"正在处理： {d['doc']}")
+                    if msg := check_error_msg(d):
+                        st.toast(msg)
+                    else:
+                        empty.progress(d["finished"] / d["total"], d["msg"])
                 st.experimental_rerun()
 
         if cols[2].button(
@@ -262,6 +267,6 @@ def knowledge_base_page(api: ApiRequest):
                 use_container_width=True,
         ):
             ret = api.delete_knowledge_base(kb)
-            st.toast(ret["msg"])
+            st.toast(ret.get("msg", " "))
             time.sleep(1)
             st.experimental_rerun()
