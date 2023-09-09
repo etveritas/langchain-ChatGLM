@@ -1,6 +1,7 @@
 from fastapi import Body
 from fastapi.responses import StreamingResponse
 from configs.model_config import llm_model_dict, LLM_MODEL
+from configs.model_config import QTPL_PROMPT, KTPL_PROMPT
 from server.chat.utils import wrap_done
 from models.chatglm import ChatChatGLM
 from langchain.llms import ChatGLM, OpenAI
@@ -12,6 +13,8 @@ import asyncio
 from langchain.prompts.chat import ChatPromptTemplate
 from typing import List
 from server.chat.utils import History
+import json
+import uuid
 
 
 def chat(query: str = Body(..., description="用户输入", examples=["恼羞成怒"]),
@@ -31,8 +34,7 @@ def chat(query: str = Body(..., description="用户输入", examples=["恼羞成
         callback = AsyncIteratorCallbackHandler()
         if "gpt" in LLM_MODEL:
             model = ChatOpenAI(
-                top_p=0.9,
-                temperature=0.6,
+                temperature=0.1,
                 streaming=True,
                 verbose=True,
                 callbacks=[callback],
@@ -42,8 +44,7 @@ def chat(query: str = Body(..., description="用户输入", examples=["恼羞成
             )
         elif "glm" in LLM_MODEL:
             model = ChatChatGLM(
-                top_p=0.9,
-                temperature=0.6,
+                temperature=0.1,
                 streaming=True,
                 verbose=True,
                 callbacks=[callback],
@@ -53,24 +54,40 @@ def chat(query: str = Body(..., description="用户输入", examples=["恼羞成
             )
 
         chat_prompt = ChatPromptTemplate.from_messages(
-            [i.to_msg_tuple() for i in history] + [("human", "{input}")])
+            [i.to_msg_tuple() for i in history]
+            + [("human", KTPL_PROMPT)]
+            + [("human", QTPL_PROMPT)]
+        )
         chain = LLMChain(prompt=chat_prompt, llm=model)
 
+        # combine prompt
+        prompt_comb = chain.prep_prompts([{"context": query, "question": query}])
         # Begin a task that runs in the background.
         task = asyncio.create_task(wrap_done(
-            chain.acall({"input": query}),
+            chain.acall({"context": query, "question": query}),
             callback.done),
         )
 
+        unq_id = uuid.uuid1()
         if stream:
             async for token in callback.aiter():
                 # Use server-sent-events to stream the response
-                yield token
+                yield json.dumps({"uuid": str(unq_id),
+                                  "answer": token,
+                                  "docs": [],
+                                  "reference": {},
+                                  "prompt": prompt_comb[0][0].to_string()},
+                                  ensure_ascii=False)
         else:
             answer = ""
             async for token in callback.aiter():
                 answer += token
-            yield answer
+            yield json.dumps({"uuid": str(unq_id),
+                              "answer": answer,
+                              "docs": [],
+                              "reference": {},
+                              "prompt": prompt_comb[0][0].to_string()},
+                              ensure_ascii=False)
 
         await task
 

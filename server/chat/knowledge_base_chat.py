@@ -2,6 +2,7 @@ from fastapi import Body, Request
 from fastapi.responses import StreamingResponse
 from configs.model_config import (llm_model_dict, LLM_MODEL, PROMPT_TEMPLATE,
                                   VECTOR_SEARCH_TOP_K, SCORE_THRESHOLD)
+from configs.model_config import (QTPL_PROMPT, KTPL_PROMPT)
 from server.chat.utils import wrap_done
 from server.utils import BaseResponse
 from langchain.chat_models import ChatOpenAI
@@ -18,6 +19,7 @@ import json
 import os
 import uuid
 import numpy as np
+from collections import defaultdict
 from urllib.parse import urlencode
 from server.knowledge_base.kb_doc_api import search_docs
 
@@ -55,8 +57,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
         callback = AsyncIteratorCallbackHandler()
         if "gpt" in LLM_MODEL:
             model = ChatOpenAI(
-                top_p=0.9,
-                temperature=0.6,
+                temperature=0.1,
                 streaming=True,
                 verbose=True,
                 callbacks=[callback],
@@ -66,8 +67,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
             )
         elif "glm" in LLM_MODEL:
             model = ChatChatGLM(
-                top_p=0.9,
-                temperature=0.6,
+                temperature=0.1,
                 streaming=True,
                 verbose=True,
                 callbacks=[callback],
@@ -79,12 +79,15 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
         context = "\n".join([doc.page_content for doc in docs])
 
         chat_prompt = ChatPromptTemplate.from_messages(
-            [i.to_msg_tuple() for i in history] + [("human", PROMPT_TEMPLATE)])
+            [i.to_msg_tuple() for i in history]
+            + [("human", KTPL_PROMPT)]
+            + [("human", QTPL_PROMPT)]
+        )
 
         chain = LLMChain(prompt=chat_prompt, llm=model)
 
         # combine prompt
-        prompt_comb = await chain.aprep_prompts([{"context": context, "question": query}])
+        prompt_comb = chain.prep_prompts([{"context": context, "question": query}])
 
         # Begin a task that runs in the background.
         task = asyncio.create_task(wrap_done(
@@ -93,6 +96,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
         )
 
         source_documents = []
+        reference_list = defaultdict(list)
         for inum, doc in enumerate(docs):
             filename = os.path.split(doc.metadata["source"])[-1]
             if local_doc_url:
@@ -101,8 +105,10 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
                 parameters = urlencode({"knowledge_base_name": knowledge_base_name, "file_name":filename})
                 url = f"{request.base_url}knowledge_base/download_doc?" + parameters
             text = f"""出处 [{inum + 1}] [{filename}]({url}) \n\n{doc.page_content}\n\n 相似度：{1100-doc.score}\n\n"""
+            
+            reference_list[filename].append([doc.page_content, str(int(1100-doc.score))])
             source_documents.append(text)
-
+        reference_list = dict(reference_list)
         unq_id = uuid.uuid1()
         if stream:
             async for token in callback.aiter():
@@ -110,6 +116,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
                 yield json.dumps({"uuid": str(unq_id),
                                   "answer": token,
                                   "docs": source_documents,
+                                  "reference": reference_list,
                                   "prompt": prompt_comb[0][0].to_string()},
                                  ensure_ascii=False)
         else:
@@ -119,6 +126,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
             yield json.dumps({"uuid": str(unq_id),
                               "answer": answer,
                               "docs": source_documents,
+                              "reference": reference_list,
                               "prompt": prompt_comb[0][0].to_string()},
                              ensure_ascii=False)
 

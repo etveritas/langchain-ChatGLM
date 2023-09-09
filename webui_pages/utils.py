@@ -305,10 +305,10 @@ class ApiRequest:
         if no_remote_api:
             from server.chat.chat import chat
             response = chat(**data)
-            return self._fastapi_stream2generator(response)
+            return self._fastapi_stream2generator(response, as_json=True)
         else:
             response = self.post("/chat/chat", json=data, stream=True)
-            return self._httpx_stream2generator(response)
+            return self._httpx_stream2generator(response, as_json=True)
 
     def knowledge_base_chat(
         self,
