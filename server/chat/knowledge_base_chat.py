@@ -57,7 +57,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
                                            model_name: str = LLM_MODEL,
                                            ) -> AsyncIterable[str]:
         callback = AsyncIteratorCallbackHandler()
-        if "gpt" in LLM_MODEL:
+        if "gpt" in model_name:
             model = ChatOpenAI(
                 temperature=0.1,
                 streaming=True,
@@ -68,7 +68,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
                 model_name=model_name,
             openai_proxy=llm_model_dict[model_name].get("openai_proxy")
             )
-        elif "glm" in LLM_MODEL:
+        elif "glm" in model_name:
             model = ChatChatGLM(
                 temperature=0.1,
                 streaming=True,
@@ -142,7 +142,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
                                            history: Optional[List[History]],
                                            model_name: str = LLM_MODEL,
                                            ) -> AsyncIterable[str]:
-        if "gpt" in LLM_MODEL:
+        if "gpt" in model_name:
             model = ChatOpenAI(
                 temperature=0.1,
                 streaming=False,
@@ -152,7 +152,7 @@ def knowledge_base_chat(query: str = Body(..., description="用户输入", examp
                 model_name=model_name,
             openai_proxy=llm_model_dict[model_name].get("openai_proxy")
             )
-        elif "glm" in LLM_MODEL:
+        elif "glm" in model_name:
             model = ChatChatGLM(
                 temperature=0.1,
                 streaming=False,
