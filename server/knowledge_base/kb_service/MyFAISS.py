@@ -15,7 +15,7 @@ class MyFAISS(FAISS):
         index: Any,
         docstore: Docstore,
         index_to_docstore_id: Dict[int, str],
-        expand_size=600, is_expand=True, 
+        expand_size=900, is_expand=True, 
         **kwargs: Any,
     ):
         super().__init__(embedding_function=embedding_function,
